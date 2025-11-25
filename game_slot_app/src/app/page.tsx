@@ -1,8 +1,8 @@
 "use client";
-import { DottedGlowBackground } from "../../components/background";
+import { DottedGlowBackground } from "./components/background";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import Loader from "../../components/loader";
+import Loader from "./components/loader";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
