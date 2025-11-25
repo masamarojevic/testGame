@@ -11,6 +11,7 @@ export default function slotPage() {
   const TONGUE: string = "/slotIcons/tongue.png";
 
   const icons: string[] = [BRAIN, EYE, HEAD, LIPS, NOSE, SKULL, TONGUE];
+  const [isSpinning, setIsSpinning] = useState(false);
 
   function generete3x3Grid() {
     const rows: number = 3;
@@ -49,28 +50,61 @@ export default function slotPage() {
   function chooseBetMoney(e: React.MouseEvent<HTMLButtonElement>) {
     //kar je user zbral z misko postane value za set bet money
     const value = Number(e.currentTarget.value);
+    console.log(value);
     setBetMoney(value);
   }
 
   //klik na spin
   function spinningTheSlot() {
-    //ce se ni nic zbralo -> alert
+    //ce se ni nic zbralo -> todo: alert
     if (betMoney === null) {
       console.log("choose bet money");
       return;
     }
-    //prvo tvoj denar minus bet money
-    let m = money - betMoney;
-    //kasneje naredi se logiko za 3 v vrsto
-    let win: boolean = false;
 
-    //in ce je zmaga tvoj m je zdej bet pa se krat 2 cene pa m minus bet
-    if (win) {
-      m += betMoney * 2;
-    } else {
-      m -= betMoney;
+    if (money === 0 || money < betMoney) {
+      //todo alert
+      console.log("out of money. reload page");
+      setIsSpinning(false);
+      return;
     }
-    setMoney(m);
+    setIsSpinning(true);
+
+    const spinInterval = setInterval(() => {
+      setIconSet(generete3x3Grid());
+    }, 80);
+
+    //  koncaj spin
+    setTimeout(() => {
+      clearInterval(spinInterval);
+
+      // koncni rezultat
+      const finalGrid = generete3x3Grid();
+      setIconSet(finalGrid);
+
+      const firstRow = finalGrid[0];
+      const middleRow = finalGrid[1];
+      const lastRow = finalGrid[2];
+      const firstRowWin =
+        firstRow[0] === firstRow[1] && firstRow[1] === firstRow[2];
+      const middleRowWin =
+        middleRow[0] === middleRow[1] && middleRow[1] === middleRow[2];
+      const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
+
+      //TODO: NAREDI SE LOGIKA DA CE IMAS 2 VRSTI AL TRI VRSTE ENAKE DOBIS SE VEC DENARJA
+
+      // update money
+      let m = money - betMoney;
+      if (middleRowWin || firstRowWin || lastRowWin) {
+        m += betMoney * 2;
+        console.log("WIN!");
+      } else {
+        console.log("LOSE!");
+      }
+
+      setMoney(m);
+      setIsSpinning(false);
+    }, 1000);
   }
   return (
     <div className="min-h-screen flex justify-center items-center flex-col overflow-hidden">
@@ -95,7 +129,7 @@ export default function slotPage() {
           <img
             key={idx}
             src={icon}
-            className="bg-white border-4 p-2 rounded w-64 h-64"
+            className="bg-white p-2 rounded w-64 h-64"
             alt="slot icon"
           />
         ))}
