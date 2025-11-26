@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useModal } from "@/app/components/modalProvider";
+import { ModalOptions } from "@/app/enums/optionEnums";
 
 export default function slotPage() {
   const BRAIN: string = "/slotIcons/brain.png";
@@ -12,6 +14,7 @@ export default function slotPage() {
 
   const icons: string[] = [BRAIN, EYE, HEAD, LIPS, NOSE, SKULL, TONGUE];
   const [isSpinning, setIsSpinning] = useState(false);
+  const { openModal } = useModal();
 
   function generete3x3Grid() {
     const rows: number = 3;
@@ -50,7 +53,6 @@ export default function slotPage() {
   function chooseBetMoney(e: React.MouseEvent<HTMLButtonElement>) {
     //kar je user zbral z misko postane value za set bet money
     const value = Number(e.currentTarget.value);
-    console.log(value);
     setBetMoney(value);
   }
 
@@ -58,13 +60,12 @@ export default function slotPage() {
   function spinningTheSlot() {
     //ce se ni nic zbralo -> todo: alert
     if (betMoney === null) {
-      console.log("choose bet money");
+      openModal(ModalOptions.noBetMoney);
       return;
     }
 
     if (money === 0 || money < betMoney) {
-      //todo alert
-      console.log("out of money. reload page");
+      openModal(ModalOptions.outOfMoney);
       setIsSpinning(false);
       return;
     }
@@ -97,9 +98,9 @@ export default function slotPage() {
       let m = money - betMoney;
       if (middleRowWin || firstRowWin || lastRowWin) {
         m += betMoney * 2;
-        console.log("WIN!");
+        openModal(ModalOptions.Win);
       } else {
-        console.log("LOSE!");
+        openModal(ModalOptions.Lose);
       }
 
       setMoney(m);
