@@ -2,18 +2,29 @@
 import React, { useState, useEffect } from "react";
 import { useModal } from "@/app/components/modalProvider";
 import { ModalOptions } from "@/app/enums/optionEnums";
+import { DottedGlowBackground } from "@/app/components/background";
 
 export default function slotPage() {
   const BRAIN: string = "/slotIcons/brain.png";
   const EYE: string = "/slotIcons/eye.png";
-  const HEAD: string = "/slotIcons/head.png";
-  const LIPS: string = "/slotIcons/lips.png";
+  const DNA: string = "/sloticons/dna.png";
   const NOSE: string = "/slotIcons/nose.png";
-  const SKULL: string = "/slotIcons/skull.png";
   const TONGUE: string = "/slotIcons/tongue.png";
+  const icons: string[] = [BRAIN, EYE, DNA, NOSE, TONGUE];
+  const colorsBtns: string[] = [
+    "bg-red-500",
+    "bg-green-500",
+    "bg-blue-500",
+    "bg-yellow-500",
+  ];
 
-  const icons: string[] = [BRAIN, EYE, HEAD, LIPS, NOSE, SKULL, TONGUE];
   const [isSpinning, setIsSpinning] = useState(false);
+  const [showBetMoney, setShowBetMoney] = useState(false);
+  const [defaultBetMoney, setDefaultBetMoney] = useState(0);
+  const [iconSet, setIconSet] = useState<string[][]>([]);
+  const [money, setMoney] = useState(500);
+  let betOptions: number[] = [20, 50, 100, 200];
+  const [betMoney, setBetMoney] = useState<number | null>(null);
   const { openModal } = useModal();
 
   function generete3x3Grid() {
@@ -33,36 +44,26 @@ export default function slotPage() {
     return grid;
   }
 
-  //zacne se en set z random 3x3 slikami // pol se ta set zrola  v nov set 3x3 ki doloci zmago||izgubo
-  //[][] 2d array od string ikon zacne []
-  const [iconSet, setIconSet] = useState<string[][]>([]);
-
   useEffect(() => {
     setIconSet(generete3x3Grid());
   }, []);
 
-  //tvoj denar ki se zacne z 500
-  const [money, setMoney] = useState(500);
-  //to so gumbi kjer si zberes koliko denarja od nastetega bos stavil
-  let betOptions: number[] = [20, 50, 100, 200];
-  // klicemo setBetMoney na gumb ki bo izbral vrednost in to postane pol betMoney.. naceloma user lahko klikne spin
-  // brez da zbere vrednost in zato je lahko null od zacetka
-  const [betMoney, setBetMoney] = useState<number | null>(null);
-
-  //klik na eden izmed gumbov
+  //KLIK BET GUMBI
   function chooseBetMoney(e: React.MouseEvent<HTMLButtonElement>) {
-    //kar je user zbral z misko postane value za set bet money
     const value = Number(e.currentTarget.value);
+    setShowBetMoney(true);
+    setDefaultBetMoney(value);
     setBetMoney(value);
   }
 
-  //klik na spin
+  //KLIK NA SPIN
   function spinningTheSlot() {
-    //ce se ni nic zbralo -> todo: alert
     if (betMoney === null) {
       openModal(ModalOptions.noBetMoney);
       return;
     }
+    let m = money - betMoney;
+    setMoney(m);
 
     if (money === 0 || money < betMoney) {
       openModal(ModalOptions.outOfMoney);
@@ -80,22 +81,20 @@ export default function slotPage() {
       clearInterval(spinInterval);
 
       // koncni rezultat
-      const finalGrid = generete3x3Grid();
+      const finalGrid = iconSet;
       setIconSet(finalGrid);
 
       const firstRow = finalGrid[0];
       const middleRow = finalGrid[1];
       const lastRow = finalGrid[2];
+
       const firstRowWin =
         firstRow[0] === firstRow[1] && firstRow[1] === firstRow[2];
       const middleRowWin =
         middleRow[0] === middleRow[1] && middleRow[1] === middleRow[2];
       const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
 
-      //TODO: NAREDI SE LOGIKA DA CE IMAS 2 VRSTI AL TRI VRSTE ENAKE DOBIS SE VEC DENARJA
-
       // update money
-      let m = money - betMoney;
       if (middleRowWin || firstRowWin || lastRowWin) {
         m += betMoney * 2;
         openModal(ModalOptions.Win);
@@ -109,31 +108,47 @@ export default function slotPage() {
   }
   return (
     <div className="min-h-screen flex justify-center items-center flex-col overflow-hidden">
-      <h1>hello, set bet money</h1>
-      <div className="space-x-4">
-        {betOptions.map((value) => (
-          <button
-            key={value}
-            value={value}
-            onClick={chooseBetMoney}
-            className="bg-slate-500"
-          >
-            {value}
-          </button>
-        ))}
+      <div className="absolute inset-0 -z-10">
+        <DottedGlowBackground />
       </div>
-      <p> your money: {money}</p>
-      <button onClick={spinningTheSlot}>Spin!</button>
-
-      <div className="grid grid-cols-3 grid-rows-3 gap-2">
-        {iconSet.flat().map((icon, idx) => (
-          <img
-            key={idx}
-            src={icon}
-            className="bg-white p-2 rounded w-64 h-64"
-            alt="slot icon"
-          />
-        ))}
+      <div className="flex w-full">
+        <div className="w-1/2 flex justify-center items-center">
+          <div className="grid grid-cols-3 grid-rows-3 gap-2">
+            {iconSet.flat().map((icon, idx) => (
+              <img
+                key={idx}
+                src={icon}
+                className="bg-white p-2 rounded w-64 h-64"
+                alt="slot icon"
+              />
+            ))}
+          </div>
+        </div>
+        <aside className="box-border w-1/2 flex flex-col justify-center items-center rounded border-4 border-[#444b97] gap-10 py-10 ">
+          <h1 className="text-3xl font-bold mb-6 mt-10">Place Your Bet</h1>
+          <div className="space-x-4">
+            {betOptions.map((value, idx) => (
+              <button
+                key={value}
+                value={value}
+                onClick={chooseBetMoney}
+                className={`${colorsBtns[idx]} text-white w-20 h-12 rounded`}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-center items-center space-x-5">
+            <p>Your bet: {defaultBetMoney}</p>
+            <p> Your money: {money}</p>
+          </div>
+          <button
+            onClick={spinningTheSlot}
+            className="bg-green-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-green-600 transition-colors mt-8 mb-10"
+          >
+            Spin!
+          </button>
+        </aside>
       </div>
     </div>
   );

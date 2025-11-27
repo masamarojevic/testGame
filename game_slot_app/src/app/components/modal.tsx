@@ -28,7 +28,7 @@ export default function Modal() {
       break;
     }
     case ModalOptions.outOfMoney: {
-      msg = "Out of money, reload page!";
+      msg = "Out of money, bet less or reload page!";
       break;
     }
     case ModalOptions.noBetMoney: {
@@ -39,7 +39,7 @@ export default function Modal() {
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black/60 z-50">
-      <div className="bg-teal-900 text-white p-8 rounded-xl">
+      <div className="bg-orange-500 text-white p-12 rounded-3xl shadow-2xl border-4 border-white text-4xl font-bold flex justify-center items-center animate-bounce">
         <p>{msg}</p>
       </div>
     </div>
