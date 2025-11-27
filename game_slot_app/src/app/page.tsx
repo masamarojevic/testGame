@@ -26,11 +26,14 @@ export default function Page() {
         <DottedGlowBackground />
       </div>
       <div className="flex flex-col justify-center items-center">
-        <h1 className="w-full xl:text-9xl md:text-8xl text-5xl sm:tracking-[17px] tracking-[10px] uppercase text-center leading-[0.70em] animate-dimlight box-reflect text-white">
+        <h1 className="w-full xl:text-9xl md:text-8xl text-4xl sm:tracking-[6px] sm:text-5xl tracking-[10px] uppercase text-center leading-[1.1em] animate-dimlight box-reflect text-white">
           Welcome to the game
         </h1>
-        <div className="relative flex flex-col justify-center items-center">
-          <p className="text-white mt-6">Soon you will be redirected</p>
+
+        <div className="relative flex flex-col justify-center items-center md:pt-20">
+          <p className="text-white mt-6 sm: text-sm md:pb-20">
+            Soon you will be redirected
+          </p>
           {loading && <Loader />}
         </div>
       </div>
