@@ -27,6 +27,54 @@ export default function slotPage() {
   const [betMoney, setBetMoney] = useState<number | null>(null);
   const { openModal } = useModal();
 
+  const winPattern = [
+    { clicksWin: 2, loopCount: 2 }, //zmaga bo ko bo  2 x 2
+    { clicksWin: 3, loopCount: 3 }, // 3x interval po 3 x 3
+    { clicksWin: 6, loopCount: 4 }, //4x interval po 6klik
+  ];
+
+  let [clicks, setClicks] = useState(0);
+  //za stet zmage v enem obj
+  const [winInxStage, setWinInxStage] = useState(0);
+  //v katerem obj se nahajas[0,1,2]
+  const [whichStage, setWhichStage] = useState(0);
+
+  function countClicks(): boolean {
+    const currentStage = winPattern[whichStage];
+    const countedClicks = clicks + 1;
+    //sli skozi objekt nic ostalo
+    const isWinningClick = countedClicks % currentStage.clicksWin === 0;
+    //ce ni zmaovalen klick pa stej to kot en klik in returnaj false celotni funkciji
+    if (!isWinningClick) {
+      setClicks(countedClicks);
+      return false;
+    }
+
+    // WIN
+    const countedWin = winInxStage + 1;
+    let countedStage = whichStage;
+    let nextWin = countedWin;
+    let nextClick = countedClicks;
+
+    console.log("counted win", countedWin);
+    console.log("counted stage", countedStage);
+
+    //ce si zmagal vec kot je zmagnih klikov v fazi pejdi v naslednjo
+    if (countedWin >= currentStage.loopCount) {
+      //plusaj ena ampak ne vec kot 3 x
+      //nula kliki in nula win v fazi
+      countedStage = (whichStage + 1) % winPattern.length;
+      nextWin = 0;
+      nextClick = 0;
+    }
+
+    //dokler je vse to true nadaljujemo z stetjem klikov
+    setClicks(nextClick);
+    setWinInxStage(nextWin);
+    setWhichStage(countedStage);
+    return true;
+  }
+
   function generete3x3Grid() {
     const rows: number = 3;
     const cols: number = 3;
@@ -79,6 +127,7 @@ export default function slotPage() {
     //  koncaj spin
     setTimeout(() => {
       clearInterval(spinInterval);
+      // const patternWin = countClicks();
 
       // koncni rezultat
       const finalGrid = iconSet;
@@ -94,14 +143,20 @@ export default function slotPage() {
         middleRow[0] === middleRow[1] && middleRow[1] === middleRow[2];
       const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
 
+      const iconWin = firstRowWin || middleRowWin || lastRowWin;
+      let patternWin = false;
+      if (!iconWin) {
+        patternWin = countClicks();
+      } else {
+        countClicks();
+      }
       // update money
-      if (middleRowWin || firstRowWin || lastRowWin) {
+      if (iconWin || patternWin) {
         m += betMoney * 2;
         openModal(ModalOptions.Win);
       } else {
         openModal(ModalOptions.Lose);
       }
-
       setMoney(m);
       setIsSpinning(false);
     }, 1000);
