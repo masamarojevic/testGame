@@ -28,9 +28,9 @@ export default function slotPage() {
   const { openModal } = useModal();
 
   const winPattern = [
-    { clicksWin: 2, loopCount: 2 }, //zmaga bo ko bo  2 x 2
-    { clicksWin: 3, loopCount: 3 }, // 3x interval po 3 x 3
-    { clicksWin: 6, loopCount: 4 }, //4x interval po 6klik
+    { clicksWin: 2, winPerLoop: 2, loopCount: 2 }, //zmaga bo ko bo  2 x 2
+    { clicksWin: 3, winPerLoop: 3, loopCount: 3 }, // 3x interval po 3 x 3
+    { clicksWin: 6, winPerLoop: 6, loopCount: 4 }, //4x interval po 6klik
   ];
 
   let [clicks, setClicks] = useState(0);
@@ -38,6 +38,7 @@ export default function slotPage() {
   const [winInxStage, setWinInxStage] = useState(0);
   //v katerem obj se nahajas[0,1,2]
   const [whichStage, setWhichStage] = useState(0);
+  const [whichLoop, setWhichLoop] = useState(0);
 
   function countClicks(): boolean {
     const currentStage = winPattern[whichStage];
@@ -55,23 +56,25 @@ export default function slotPage() {
     let countedStage = whichStage;
     let nextWin = countedWin;
     let nextClick = countedClicks;
-
-    console.log("counted win", countedWin);
-    console.log("counted stage", countedStage);
+    let nextLoop = whichLoop;
 
     //ce si zmagal vec kot je zmagnih klikov v fazi pejdi v naslednjo
-    if (countedWin >= currentStage.loopCount) {
-      //plusaj ena ampak ne vec kot 3 x
-      //nula kliki in nula win v fazi
-      countedStage = (whichStage + 1) % winPattern.length;
+    if (countedWin >= currentStage.winPerLoop) {
+      nextLoop += 1;
       nextWin = 0;
-      nextClick = 0;
+
+      if (nextLoop >= currentStage.loopCount) {
+        countedStage = (whichStage + 1) % winPattern.length;
+        nextClick = 0;
+        nextLoop = 0;
+      }
     }
 
-    //dokler je vse to true nadaljujemo z stetjem klikov
+    //dokler je vse to true nadaljujemo z stetjem klikov zmag, faz,loop
     setClicks(nextClick);
     setWinInxStage(nextWin);
     setWhichStage(countedStage);
+    setWhichLoop(nextLoop);
     return true;
   }
 
@@ -127,11 +130,10 @@ export default function slotPage() {
     //  koncaj spin
     setTimeout(() => {
       clearInterval(spinInterval);
-      // const patternWin = countClicks();
-
-      // koncni rezultat
-      const finalGrid = iconSet;
-      setIconSet(finalGrid);
+      //vedno prvo stej klike
+      const patternWin = countClicks();
+      //kopija grida
+      const finalGrid = iconSet.map((row) => [...row]);
 
       const firstRow = finalGrid[0];
       const middleRow = finalGrid[1];
@@ -144,18 +146,26 @@ export default function slotPage() {
       const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
 
       const iconWin = firstRowWin || middleRowWin || lastRowWin;
-      let patternWin = false;
-      if (!iconWin) {
-        patternWin = countClicks();
-      } else {
-        countClicks();
-      }
-      // update money
-      if (iconWin || patternWin) {
+
+      if (!iconWin && patternWin) {
+        const winIcon = finalGrid[1][1];
+        finalGrid[1] = [winIcon, winIcon, winIcon];
+        setIconSet(finalGrid);
         m += betMoney * 2;
         openModal(ModalOptions.Win);
+
+        setTimeout(() => {
+          setIconSet(generete3x3Grid());
+        }, 1000);
+      }
+      // update money
+      else if (iconWin) {
+        m += betMoney * 2;
+        openModal(ModalOptions.Win);
+        setIconSet(finalGrid);
       } else {
         openModal(ModalOptions.Lose);
+        setIconSet(finalGrid);
       }
       setMoney(m);
       setIsSpinning(false);
