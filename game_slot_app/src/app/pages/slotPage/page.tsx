@@ -26,6 +26,7 @@ export default function slotPage() {
   let betOptions: number[] = [20, 50, 100, 200];
   const [betMoney, setBetMoney] = useState<number | null>(null);
   const { openModal } = useModal();
+  const [tempGrid, setTempGrid] = useState<string[][] | null>(null);
 
   const winPattern = [
     { clicksWin: 2, winPerLoop: 2, loopCount: 2 }, //zmaga bo ko bo  2 x 2
@@ -109,6 +110,8 @@ export default function slotPage() {
 
   //KLIK NA SPIN
   function spinningTheSlot() {
+    //null da lahko dobimo animacijo
+    setTempGrid(null);
     if (betMoney === null) {
       openModal(ModalOptions.noBetMoney);
       return;
@@ -146,26 +149,21 @@ export default function slotPage() {
       const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
 
       const iconWin = firstRowWin || middleRowWin || lastRowWin;
-
       if (!iconWin && patternWin) {
         const winIcon = finalGrid[1][1];
-        finalGrid[1] = [winIcon, winIcon, winIcon];
-        setIconSet(finalGrid);
-        m += betMoney * 2;
-        openModal(ModalOptions.Win);
 
-        setTimeout(() => {
-          setIconSet(generete3x3Grid());
-        }, 1000);
-      }
-      // update money
-      else if (iconWin) {
+        const tempGrid = finalGrid.map((row, i) =>
+          i === 1 ? [winIcon, winIcon, winIcon] : [...row]
+        );
+
+        setTempGrid(tempGrid); // zacasen win
+
         m += betMoney * 2;
         openModal(ModalOptions.Win);
-        setIconSet(finalGrid);
       } else {
-        openModal(ModalOptions.Lose);
-        setIconSet(finalGrid);
+        setTempGrid(null); // ce ni pattern zmaga zacasen grid je null, naj se pokaze default
+        iconWin && (m += betMoney * 2);
+        openModal(iconWin ? ModalOptions.Win : ModalOptions.Lose);
       }
       setMoney(m);
       setIsSpinning(false);
@@ -179,7 +177,7 @@ export default function slotPage() {
       <div className="flex w-full">
         <div className="w-1/2 flex justify-center items-center">
           <div className="grid grid-cols-3 grid-rows-3 gap-2">
-            {iconSet.flat().map((icon, idx) => (
+            {(tempGrid ?? iconSet).flat().map((icon, idx) => (
               <img
                 key={idx}
                 src={icon}
