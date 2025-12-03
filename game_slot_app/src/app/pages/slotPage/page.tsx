@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useModal } from "@/app/components/modalProvider";
 import { ModalOptions } from "@/app/enums/optionEnums";
 import { DottedGlowBackground } from "@/app/components/background";
+import { generate3x3Grid } from "@/utils/createGrid";
+import { getSpinningTheSlot } from "@/utils/spinLogic";
+import { getClicks } from "@/utils/winPattern";
+import { winPattern } from "@/utils/winPattern";
 
 export default function slotPage() {
   const BRAIN: string = "/slotIcons/brain.png";
@@ -27,13 +31,6 @@ export default function slotPage() {
   const [betMoney, setBetMoney] = useState<number | null>(null);
   const { openModal } = useModal();
   const [tempGrid, setTempGrid] = useState<string[][] | null>(null);
-
-  const winPattern = [
-    { clicksWin: 2, winPerLoop: 2, loopCount: 2 }, //zmaga bo ko bo  2 x 2
-    { clicksWin: 3, winPerLoop: 3, loopCount: 3 }, // 3x interval po 3 x 3
-    { clicksWin: 6, winPerLoop: 6, loopCount: 4 }, //4x interval po 6klik
-  ];
-
   let [clicks, setClicks] = useState(0);
   //za stet zmage v enem obj
   const [winInxStage, setWinInxStage] = useState(0);
@@ -42,62 +39,22 @@ export default function slotPage() {
   const [whichLoop, setWhichLoop] = useState(0);
 
   function countClicks(): boolean {
-    const currentStage = winPattern[whichStage];
-    const countedClicks = clicks + 1;
-    //sli skozi objekt nic ostalo
-    const isWinningClick = countedClicks % currentStage.clicksWin === 0;
-    //ce ni zmaovalen klick pa stej to kot en klik in returnaj false celotni funkciji
-    if (!isWinningClick) {
-      setClicks(countedClicks);
-      return false;
-    }
-
-    // WIN
-    const countedWin = winInxStage + 1;
-    let countedStage = whichStage;
-    let nextWin = countedWin;
-    let nextClick = countedClicks;
-    let nextLoop = whichLoop;
-
-    //ce si zmagal vec kot je zmagnih klikov v fazi pejdi v naslednjo
-    if (countedWin >= currentStage.winPerLoop) {
-      nextLoop += 1;
-      nextWin = 0;
-
-      if (nextLoop >= currentStage.loopCount) {
-        countedStage = (whichStage + 1) % winPattern.length;
-        nextClick = 0;
-        nextLoop = 0;
-      }
-    }
-
-    //dokler je vse to true nadaljujemo z stetjem klikov zmag, faz,loop
-    setClicks(nextClick);
-    setWinInxStage(nextWin);
-    setWhichStage(countedStage);
-    setWhichLoop(nextLoop);
-    return true;
-  }
-
-  function generete3x3Grid() {
-    const rows: number = 3;
-    const cols: number = 3;
-    const grid: string[][] = [];
-
-    //za vsak i v rows naredi array in za vsak j v cols daj sliko
-    for (let i = 0; i < rows; i++) {
-      let row: string[] = [];
-      for (let j = 0; j < cols; j++) {
-        const rndIcon = icons[Math.floor(Math.random() * icons.length)];
-        row.push(rndIcon);
-      }
-      grid.push(row);
-    }
-    return grid;
+    const result = getClicks(
+      clicks,
+      whichStage,
+      winInxStage,
+      whichLoop,
+      winPattern
+    );
+    setClicks(result.nextClick);
+    setWinInxStage(result.nextWin);
+    setWhichStage(result.nextStage);
+    setWhichLoop(result.nextLoop);
+    return result.win;
   }
 
   useEffect(() => {
-    setIconSet(generete3x3Grid());
+    setIconSet(generate3x3Grid(icons));
   }, []);
 
   //KLIK BET GUMBI
@@ -127,7 +84,7 @@ export default function slotPage() {
     setIsSpinning(true);
 
     const spinInterval = setInterval(() => {
-      setIconSet(generete3x3Grid());
+      setIconSet(generate3x3Grid(icons));
     }, 80);
 
     //  koncaj spin
@@ -138,34 +95,15 @@ export default function slotPage() {
       //kopija grida
       const finalGrid = iconSet.map((row) => [...row]);
 
-      const firstRow = finalGrid[0];
-      const middleRow = finalGrid[1];
-      const lastRow = finalGrid[2];
+      const { iconWin, money, tempGrid } = getSpinningTheSlot(
+        finalGrid,
+        betMoney,
+        patternWin
+      );
 
-      const firstRowWin =
-        firstRow[0] === firstRow[1] && firstRow[1] === firstRow[2];
-      const middleRowWin =
-        middleRow[0] === middleRow[1] && middleRow[1] === middleRow[2];
-      const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
-
-      const iconWin = firstRowWin || middleRowWin || lastRowWin;
-      if (!iconWin && patternWin) {
-        const winIcon = finalGrid[1][1];
-
-        const tempGrid = finalGrid.map((row, i) =>
-          i === 1 ? [winIcon, winIcon, winIcon] : [...row]
-        );
-
-        setTempGrid(tempGrid); // zacasen win
-
-        m += betMoney * 2;
-        openModal(ModalOptions.Win);
-      } else {
-        setTempGrid(null); // ce ni pattern zmaga zacasen grid je null, naj se pokaze default
-        iconWin && (m += betMoney * 2);
-        openModal(iconWin ? ModalOptions.Win : ModalOptions.Lose);
-      }
-      setMoney(m);
+      setTempGrid(tempGrid); // zacasen win
+      setMoney((prev) => prev + money);
+      openModal(iconWin || patternWin ? ModalOptions.Win : ModalOptions.Lose);
       setIsSpinning(false);
     }, 1000);
   }
