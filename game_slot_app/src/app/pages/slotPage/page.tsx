@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useModal } from "@/app/components/modalProvider";
 import { ModalOptions } from "@/app/enums/optionEnums";
 import { DottedGlowBackground } from "@/app/components/background";
+import { generate3x3Grid } from "@/utils/createGrid";
+import { getSpinningTheSlot } from "@/utils/spinLogic";
+import { getClicks } from "@/utils/winPattern";
+import { winPattern } from "@/utils/winPattern";
 
 export default function slotPage() {
   const BRAIN: string = "/slotIcons/brain.png";
@@ -26,26 +30,31 @@ export default function slotPage() {
   let betOptions: number[] = [20, 50, 100, 200];
   const [betMoney, setBetMoney] = useState<number | null>(null);
   const { openModal } = useModal();
+  const [tempGrid, setTempGrid] = useState<string[][] | null>(null);
+  let [clicks, setClicks] = useState(0);
+  //za stet zmage v enem obj
+  const [winInxStage, setWinInxStage] = useState(0);
+  //v katerem obj se nahajas[0,1,2]
+  const [whichStage, setWhichStage] = useState(0);
+  const [whichLoop, setWhichLoop] = useState(0);
 
-  function generete3x3Grid() {
-    const rows: number = 3;
-    const cols: number = 3;
-    const grid: string[][] = [];
-
-    //za vsak i v rows naredi array in za vsak j v cols daj sliko
-    for (let i = 0; i < rows; i++) {
-      let row: string[] = [];
-      for (let j = 0; j < cols; j++) {
-        const rndIcon = icons[Math.floor(Math.random() * icons.length)];
-        row.push(rndIcon);
-      }
-      grid.push(row);
-    }
-    return grid;
+  function countClicks(): boolean {
+    const result = getClicks(
+      clicks,
+      whichStage,
+      winInxStage,
+      whichLoop,
+      winPattern
+    );
+    setClicks(result.nextClick);
+    setWinInxStage(result.nextWin);
+    setWhichStage(result.nextStage);
+    setWhichLoop(result.nextLoop);
+    return result.win;
   }
 
   useEffect(() => {
-    setIconSet(generete3x3Grid());
+    setIconSet(generate3x3Grid(icons));
   }, []);
 
   //KLIK BET GUMBI
@@ -58,6 +67,8 @@ export default function slotPage() {
 
   //KLIK NA SPIN
   function spinningTheSlot() {
+    //null da lahko dobimo animacijo
+    setTempGrid(null);
     if (betMoney === null) {
       openModal(ModalOptions.noBetMoney);
       return;
@@ -73,36 +84,26 @@ export default function slotPage() {
     setMoney(m);
 
     const spinInterval = setInterval(() => {
-      setIconSet(generete3x3Grid());
+      setIconSet(generate3x3Grid(icons));
     }, 80);
 
     //  koncaj spin
     setTimeout(() => {
       clearInterval(spinInterval);
+      //vedno prvo stej klike
+      const patternWin = countClicks();
+      //kopija grida
+      const finalGrid = iconSet.map((row) => [...row]);
 
-      // koncni rezultat
-      const finalGrid = iconSet;
-      setIconSet(finalGrid);
+      const { iconWin, money, tempGrid } = getSpinningTheSlot(
+        finalGrid,
+        betMoney,
+        patternWin
+      );
 
-      const firstRow = finalGrid[0];
-      const middleRow = finalGrid[1];
-      const lastRow = finalGrid[2];
-
-      const firstRowWin =
-        firstRow[0] === firstRow[1] && firstRow[1] === firstRow[2];
-      const middleRowWin =
-        middleRow[0] === middleRow[1] && middleRow[1] === middleRow[2];
-      const lastRowWin = lastRow[0] === lastRow[1] && lastRow[1] === lastRow[2];
-
-      // update money
-      if (middleRowWin || firstRowWin || lastRowWin) {
-        m += betMoney * 2;
-        openModal(ModalOptions.Win);
-      } else {
-        openModal(ModalOptions.Lose);
-      }
-
-      setMoney(m);
+      setTempGrid(tempGrid); // zacasen win
+      setMoney((prev) => prev + money);
+      openModal(iconWin || patternWin ? ModalOptions.Win : ModalOptions.Lose);
       setIsSpinning(false);
     }, 1000);
   }
@@ -111,10 +112,10 @@ export default function slotPage() {
       <div className="absolute inset-0 -z-10">
         <DottedGlowBackground />
       </div>
-      <div className="flex flex-col lg:flex-row w-full lg:gap-5 items-start lg:items-stretch lg:pr-2 lg:pl-2">
-        <div className="w-full lg:w-1/2 md:p-6 flex justify-center box-border items-center p-2 order-last lg:order-1 lg:border-4 lg:border-[#444b97] rounded">
-          <div className="grid grid-cols-3 grid-rows-3 gap-2 sm:gap-3 lg:gap-4 pt-10 sm:pt-0">
-            {iconSet.flat().map((icon, idx) => (
+      <div className="flex w-full">
+        <div className="w-1/2 flex justify-center items-center">
+          <div className="grid grid-cols-3 grid-rows-3 gap-2">
+            {(tempGrid ?? iconSet).flat().map((icon, idx) => (
               <img
                 key={idx}
                 src={icon}
