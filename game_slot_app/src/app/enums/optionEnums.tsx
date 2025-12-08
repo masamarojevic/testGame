@@ -3,4 +3,5 @@ export enum ModalOptions {
   Lose = "lose",
   outOfMoney = "outOfMoney",
   noBetMoney = "noBetMoney",
+  ExtraWin = "extraWin",
 }

@@ -20,7 +20,7 @@ export default function Modal() {
 
   switch (type) {
     case ModalOptions.Win: {
-      msg = "You won!";
+      msg = "You win!";
       break;
     }
     case ModalOptions.Lose: {
@@ -34,6 +34,9 @@ export default function Modal() {
     case ModalOptions.noBetMoney: {
       msg = "You have not bet any money!";
       break;
+    }
+    case ModalOptions.ExtraWin: {
+      msg = "Double match!";
     }
   }
 
