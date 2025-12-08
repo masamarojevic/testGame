@@ -8,10 +8,10 @@ import { getSpinningTheSlot } from "@/utils/spinLogic";
 import { getClicks } from "@/utils/winPattern";
 import { winPattern } from "@/utils/winPattern";
 
-export default function slotPage() {
+export default function SlotPage() {
   const BRAIN: string = "/slotIcons/brain.png";
   const EYE: string = "/slotIcons/eye.png";
-  const DNA: string = "/sloticons/dna.png";
+  const DNA: string = "/slotIcons/dna.png";
   const NOSE: string = "/slotIcons/nose.png";
   const TONGUE: string = "/slotIcons/tongue.png";
   const icons: string[] = [BRAIN, EYE, DNA, NOSE, TONGUE];
