@@ -12,7 +12,7 @@ export default function Page() {
       setLoading(true);
     }, 2000);
     const redirect = setTimeout(() => {
-      router.push("/pages/slotPage");
+      router.push("/slot-page");
     }, 5000);
     return () => {
       clearTimeout(showLoader);
