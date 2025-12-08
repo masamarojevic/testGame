@@ -27,6 +27,9 @@ const config: Config = {
           },
         },
       },
+      fontFamily: {
+        quantico: ["Quantico", "san-serif"],
+      },
       animation: {
         dimlight: "dimlight 5s infinite",
       },
