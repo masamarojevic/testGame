@@ -16,10 +16,10 @@ export default function slotPage() {
   const TONGUE: string = "/slotIcons/tongue.png";
   const icons: string[] = [BRAIN, EYE, DNA, NOSE, TONGUE];
   const colorsBtns: string[] = [
-    "bg-red-500",
-    "bg-green-500",
-    "bg-blue-500",
-    "bg-yellow-500",
+    "bg-red-500 hover:bg-red-400",
+    "bg-green-500 hover:bg-green-400",
+    "bg-blue-500 hover:bg-blue-400",
+    "bg-yellow-500 hover:bg-yellow-400",
   ];
 
   const [isSpinning, setIsSpinning] = useState(false);
@@ -126,7 +126,7 @@ export default function slotPage() {
           </div>
         </div>
         <aside className="w-full box-border lg:w-1/2 flex flex-col justify-center items-center rounded border-0 lg:border-4 lg:border-[#444b97] lg:gap-10 py-2 gap-1 order-first lg:order-2">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-8">
+          <h1 className="font-quantico text-2xl sm:text-3xl font-bold mb-8">
             Place Your Bet
           </h1>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
@@ -135,21 +135,21 @@ export default function slotPage() {
                 key={value}
                 value={value}
                 onClick={chooseBetMoney}
-                className={`${colorsBtns[idx]} text-white w-16 h-10 sm:w-20 sm:h-12 rounded`}
+                className={`${colorsBtns[idx]} font-quantico font-normal text-white w-16 h-10 sm:w-20 sm:h-12 rounded`}
               >
                 {value}
               </button>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-5 mt-2">
+          <div className="font-quantico font-normal flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-5 mt-2">
             <p>Your bet: {defaultBetMoney}</p>
             <p> Your money: {money}</p>
           </div>
           <button
             onClick={spinningTheSlot}
-            className="bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-colors w-32 py-3 fixed bottom-8 left-1/2 -translate-x-1/2 z-50 lg:static lg:mt-4 lg:mb-10 lg:translate-x-0"
+            className="font-quantico bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-colors w-32 py-3 fixed bottom-8 left-1/2 -translate-x-1/2 z-50 lg:static lg:mt-4 lg:mb-10 lg:translate-x-0"
           >
-            Spin!
+            SPIN
           </button>
         </aside>
       </div>
