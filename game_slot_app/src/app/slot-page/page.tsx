@@ -112,8 +112,8 @@ export default function SlotPage() {
       <div className="absolute inset-0 -z-10">
         <DottedGlowBackground />
       </div>
-      <div className="flex w-full">
-        <div className="w-1/2 flex justify-center items-center">
+      <div className="flex flex-col lg:flex-row w-full lg:gap-5 items-start lg:items-stretch lg:pr-2 lg:pl-2">
+        <div className="w-full lg:w-1/2 md:p-6 flex justify-center box-border items-center p-2 order-last lg:order-1 lg:border--4 lg:border-[#444b97] rounded">
           <div className="grid grid-cols-3 grid-rows-3 gap-2">
             {(tempGrid ?? iconSet).flat().map((icon, idx) => (
               <img
@@ -152,6 +152,16 @@ export default function SlotPage() {
             SPIN
           </button>
         </aside>
+      </div>
+      <div className="m-10">
+        Icons by{" "}
+        <a href="https://www.freepik.com" target="_blank">
+          Freepik
+        </a>
+        from{" "}
+        <a href="https://www.flaticon.com/" target="_blank">
+          Flaticon
+        </a>
       </div>
     </div>
   );
