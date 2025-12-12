@@ -113,7 +113,7 @@ export default function SlotPage() {
         <DottedGlowBackground />
       </div>
       <div className="flex flex-col lg:flex-row w-full lg:gap-5 items-start lg:items-stretch lg:pr-2 lg:pl-2">
-        <div className="w-full lg:w-1/2 md:p-6 flex justify-center box-border items-center p-2 order-last lg:order-1 lg:border--4 lg:border-[#444b97] rounded">
+        <div className="w-full lg:w-1/2 md:p-6 flex justify-center box-border items-center p-2 order-1 lg:order-1 lg:border--4 lg:border-[#444b97] rounded">
           <div className="grid grid-cols-3 grid-rows-3 gap-2">
             {(tempGrid ?? iconSet).flat().map((icon, idx) => (
               <img
@@ -125,8 +125,8 @@ export default function SlotPage() {
             ))}
           </div>
         </div>
-        <aside className="w-full box-border lg:w-1/2 flex flex-col justify-center items-center rounded border-0 lg:border-4 lg:border-[#444b97] lg:gap-10 py-2 gap-1 order-first lg:order-2">
-          <h1 className="font-quantico text-2xl sm:text-3xl font-bold mb-8">
+        <aside className="w-full box-border lg:w-1/2 flex flex-col justify-center items-center rounded border-0 lg:border-4 lg:border-[#444b97] lg:gap-10 py-2 gap-4 order-2 lg:order-2">
+          <h1 className="font-quantico text-2xl sm:text-3xl font-bold mt-2">
             Place Your Bet
           </h1>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
@@ -147,13 +147,13 @@ export default function SlotPage() {
           </div>
           <button
             onClick={spinningTheSlot}
-            className="font-quantico bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-colors w-32 py-3 fixed bottom-8 left-1/2 -translate-x-1/2 z-50 lg:static lg:mt-4 lg:mb-10 lg:translate-x-0"
+            className="font-quantico bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-colors w-32 py-3 lg:static lg:mt-4 lg:mb-10 lg:translate-x-0 mb-10 mt-4"
           >
             SPIN
           </button>
         </aside>
       </div>
-      <div className="m-10">
+      <div className="mt-5">
         Icons by{" "}
         <a href="https://www.freepik.com" target="_blank">
           Freepik
